@@ -1,0 +1,40 @@
+.film-poster__img {
+  margin-bottom: 8px;
+}
+
+.info {
+  font-family: 'Roboto';
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  text-align: left;
+  margin-bottom: 20px;
+  line-height: 1.16;
+
+  &__title {
+    color: #000000;
+    text-transform: uppercase;
+    font-weight: 500;
+    // margin-bottom: 8px;
+  }
+  &__genres,
+  &__delimeter,
+  &__year {
+    color: #ff6b08;
+    font-weight: 500;
+  }
+
+  &__rating {
+    background-color: #ff6b08;
+    padding: 0 10px;
+    border-radius: 5px;
+    color: #fff;
+    font-family: 'Roboto';
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 14px;
+    letter-spacing: 0em;
+    text-align: center;
+  }
+}

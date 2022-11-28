@@ -2,10 +2,10 @@
   "name": "parcel-project-template",
   "version": "2.0.0",
   "description": "",
-  "homepage": "https://github.com/BlackyHat/goit-js-hw-08",
+  "homepage": "https://github.com/BlackyHat/testFilm",
   "scripts": {
-    "start": "parcel src/*.html",
-    "build": "parcel build src/*.html --public-url /goit-js-hw-08"
+    "start": "parcel src/*.html -p 7777",
+    "build": "parcel build src/*.html --public-url /testFilm"
   },
   "repository": {
     "type": "git",
@@ -19,12 +19,17 @@
   },
   "dependencies": {
     "@vimeo/player": "^2.18.0",
+    "axios": "^1.2.0",
+    "firebase": "^9.14.0",
+    "lodash.debounce": "^4.0.8",
     "lodash.throttle": "^4.1.1",
     "modern-normalize": "^1.1.0",
+    "notiflix": "^3.2.5",
     "simplelightbox": "^2.10.3"
   },
   "devDependencies": {
     "@parcel/transformer-sass": "^2.6.0",
+    "buffer": "^6.0.3",
     "parcel": "^2.6.0",
     "parcel-reporter-clean-dist": "^1.0.4",
     "posthtml-include": "^1.7.4"

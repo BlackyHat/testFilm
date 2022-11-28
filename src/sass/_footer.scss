@@ -1,0 +1,38 @@
+.footer {
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
+  font-size: 16px;
+  background-color: #f7f7f7;
+  color: #545454;
+
+  padding: 20px;
+}
+
+.inner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon-love {
+  position: relative;
+  padding-left: 34px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: #ff6b08;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url('../images/icon-love.svg');
+  }
+}
+
+.dev-link {
+  text-decoration: underline;
+}
