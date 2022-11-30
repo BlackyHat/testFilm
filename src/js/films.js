@@ -1,45 +1,42 @@
-import { Notify } from 'notiflix';
-// import SimpleLightbox from 'simplelightbox';
-// import 'simplelightbox/dist/simple-lightbox.min.css';
+// import { Notify } from 'notiflix';
 import { FilmsApiService } from './search-api';
-// import debounce from 'lodash.debounce';
+
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500/';
 const filmsApiService = new FilmsApiService();
-// const lightbox = new SimpleLightbox('.gallery a', {
-//   captionsData: 'alt',
-//   captionDelay: 100,
-// });
+
 const refs = {
   form: document.querySelector('.search-form'),
   gallery: document.querySelector('.gallery'),
   moreBtn: document.querySelector('.load-more'),
+  spinner: document.querySelector('.loading'),
 };
 let renderImgs = 0;
 let isSearchEnd = false;
 //====================================================================== messages
-const END_MSG = () =>
-  Notify.info(`We're sorry, but you've reached the end of search results.`);
-const ERR_MSG = () =>
-  Notify.failure(
-    `Sorry, there are no images matching your search query. Please try again.`
-  );
-const SUCSESS_MSG = quantity =>
-  Notify.success(`Hooray! We found ${quantity} images.`);
+// const END_MSG = () =>
+//   Notify.info(`We're sorry, but you've reached the end of search results.`);
+// const ERR_MSG = () =>
+//   Notify.failure(
+//     `Sorry, there are no images matching your search query. Please try again.`
+//   );
+// const SUCSESS_MSG = quantity =>
+//   Notify.success(`Hooray! We found ${quantity} images.`);
 //======================================================================
 
 refs.form.addEventListener('submit', onSubmitSearch);
-// refs.moreBtn.addEventListener('click', getFilms);
+//======================================================================
 getTrendingFilms();
-// hideMoreBtn();
+//======================================================================
 function onSubmitSearch(e) {
   clearResults();
   e.preventDefault();
   scrollToTop();
+  //======================================================================
+  refs.spinner.classList.remove('visually-hidden');
+  //======================================================================
   renderImgs = 0;
   filmsApiService.query = e.currentTarget.elements.searchQuery.value.trim();
   filmsApiService.resetResultPage();
-  //   window.addEventListener('scroll', loadNext);
-
   getFilms();
 }
 
@@ -49,60 +46,76 @@ function getFilms() {
     .then(({ results, total_results }) => {
       renderImgs += results.length;
       //===============================================================
-      //   console.log(filmsApiService.genres_ids_array);
       if (!total_results) {
         window.removeEventListener('scroll', loadNext);
         isSearchEnd = true;
-        throw new Error(ERR_MSG());
+        throw new Error();
+        // throw new Error(ERR_MSG());
       }
       searchResultMsg(filmsApiService.resultPage, total_results);
       createMarkup(results);
+      //======================================================================
+      refs.spinner.classList.add('visually-hidden');
+      //======================================================================
 
       if (total_results > renderImgs) {
         filmsApiService.incrementResultPage();
-        // showMoreBtn();
       } else {
-        window.removeEventListener('scroll', loadNext);
         isSearchEnd = true;
       }
 
       if (renderImgs === total_results && total_results > PER_PAGE) {
-        throw new Error(END_MSG());
+        // throw new Error(END_MSG());
+        throw new Error();
       }
     })
-    .catch(error => error);
+    .catch(error => {
+      //   markupError();
+      return error;
+    });
 }
 
 function getTrendingFilms() {
+  //======================================================================
+  refs.spinner.classList.remove('visually-hidden');
+  //======================================================================
+
   filmsApiService
     .getTrendingDataApi()
     .then(({ results, total_results }) => {
       renderImgs += results.length;
       if (!total_results) {
-        window.removeEventListener('scroll', loadNext);
         isSearchEnd = true;
-        throw new Error(ERR_MSG());
+        throw new Error();
+
+        // throw new Error(ERR_MSG());
       }
       searchResultMsg(filmsApiService.resultPage, total_results);
       createMarkup(results);
+      //======================================================================
+      refs.spinner.classList.add('visually-hidden');
+      //======================================================================
 
       if (total_results > renderImgs) {
         filmsApiService.incrementResultPage();
       } else {
-        window.removeEventListener('scroll', loadNext);
         isSearchEnd = true;
       }
 
       if (renderImgs === total_results && total_results > PER_PAGE) {
-        throw new Error(END_MSG());
+        throw new Error();
+        // throw new Error(END_MSG());
       }
     })
-    .catch(error => error);
+    .catch(error => {
+      //   markupError();
+      return error;
+    });
 }
 
 function searchResultMsg(currentPage, total) {
   if (currentPage === 1) {
-    SUCSESS_MSG(total);
+    // SUCSESS_MSG(total);
   }
 }
 
@@ -120,29 +133,32 @@ function createMarkup(data) {
         });
       });
 
-      return `<div class="film-card">  <a class="film-poster__link link" href="${
-        IMAGE_URL + el.poster_path
-      }">
-  <img src="${
-    IMAGE_URL + el.poster_path
-  }" class="film-poster__img" loading="lazy" />
-          </a>
-  <div class="info">
-    <p class="info__title">
-      ${el.title}
-    </p>
-    <p class="info__genres">
-    ${genres_ids.join(
-      ', '
-    )} | ${date.getFullYear()} <span class="info__rating">${
-        el.vote_average
-      }</span>
-    </p>
-  </div>
-</div>`;
+      return `<li class="gallery__item"  
+      >
+            <a class="film-card" data-id="${el.id}">
+                    <img src="${IMAGE_URL + el.poster_path}" 
+                        class="film-poster__img" loading="lazy" />
+                  
+
+                <div class="info" data-id="${el.id}">
+                <p class="info__title">${el.title}</p>
+
+                  <p class="info__genres">
+                  ${genres_ids.join(', ')} | ${date.getFullYear()} 
+                  <span class="info__rating">
+                  ${el.vote_average.toFixed(1)}</span>
+               </p>
+            </div>
+
+            </a>
+</li>`;
     })
     .join('');
   refs.gallery.insertAdjacentHTML('beforeEnd', markup);
+}
+
+function markupError() {
+  return `<div class="film-card">  <p class="error-info">Ooops.... 404 error </p></div>`;
 }
 
 function clearResults() {
@@ -175,17 +191,6 @@ function scrollToTop() {
 }
 //==================================================================infinite scroll
 
-// const loadNext = debounce(() => {
-//   const beforeEndPx = 100;
-//   if (
-//     window.scrollY + window.innerHeight >
-//       document.documentElement.scrollHeight - beforeEndPx &&
-//     !isSearchEnd
-//   ) {
-//     getFilms();
-//   }
-// }, 150);
-
 /*
     {
       "poster_path": "/cezWGskPY5x7GaglTTRN4Fugfb8.jpg",
@@ -209,3 +214,81 @@ function scrollToTop() {
     },
 
     */
+
+/*
+    adult
+: 
+false
+backdrop_path
+: 
+"/bQXAqRx2Fgc46uCVWgoPz5L5Dtr.jpg"
+belongs_to_collection
+: 
+null
+budget
+: 
+200000000
+genres
+: 
+[{id: 28, name: "Action"}, {id: 14, name: "Fantasy"}, {id: 878, name: "Science Fiction"}]
+homepage
+: 
+"https://www.dc.com/BlackAdam"
+id
+: 
+436270
+imdb_id
+: 
+"tt6443346"
+original_language
+: 
+"en"
+original_title
+: 
+"Black Adam"
+overview
+: 
+"Nearly 5,000 years after he was bestowed with the almighty powers of the Egyptian gods—and imprisoned just as quickly—Black Adam is freed from his earthly tomb, ready to unleash his unique form of justice on the modern world."
+popularity
+: 
+15314.93
+poster_path
+: 
+"/pFlaoHTZeyNkG83vxsAJiGzfSsa.jpg"
+production_companies
+: 
+[,…]
+production_countries
+: 
+[{iso_3166_1: "US", name: "United States of America"}]
+release_date
+: 
+"2022-10-19"
+revenue
+: 
+368000000
+runtime
+: 
+125
+spoken_languages
+: 
+[{english_name: "Danish", iso_639_1: "da", name: "Dansk"},…]
+status
+: 
+"Released"
+tagline
+: 
+"The world needed a hero. It got Black Adam."
+title
+: 
+"Black Adam"
+video
+: 
+false
+vote_average
+: 
+7.29
+vote_count
+: 
+2096
+*/
