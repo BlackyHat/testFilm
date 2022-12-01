@@ -5,6 +5,7 @@
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 98;
 }
 
 .modal__icon {
@@ -13,6 +14,7 @@
   height: 14px;
   fill: currentColor;
   color: #000000;
+  background-color: #fff;
   position: absolute;
   top: 16px;
   right: 16px;
@@ -33,7 +35,15 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 20px;
-  overflow-y: auto;
+  overflow-y: scroll;
+  z-index: 99;
+}
+
+.gallery__item {
+  @media screen and (min-width: 767px) {
+    display: flex;
+    justify-content: space-between;
+  }
 }
 
 .film-detail {

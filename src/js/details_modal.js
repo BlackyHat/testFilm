@@ -1,6 +1,9 @@
 import { FilmsApiService } from './search-api';
+import { ModalBox } from './pure_modal';
 
 const filmsApiService = new FilmsApiService();
+const modalBox = new ModalBox();
+
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500/';
 const refs = {
   gallery: document.querySelector('.gallery'),
@@ -11,32 +14,46 @@ refs.gallery.addEventListener('click', onGalleryItemClick);
 
 function onGalleryItemClick(e) {
   e.preventDefault();
-  if (e.target.parentNode.dataset.id) {
+  if (e.target.closest('li.gallery__item')) {
+    const elementId = e.target.closest('li');
     // refs.spinner.classList.remove('visually-hidden');
-    createModal();
-    addListenerOnClickClose();
-    addListenerOnKeyClose();
-    filmsApiService.movieId = e.target.parentNode.dataset.id;
+    modalBox.createModal();
+    modalBox.addListenerOnClickClose();
+    modalBox.addListenerOnKeyClose();
+    filmsApiService.movieId = elementId.id;
     getFilmInfo();
-    refs.gallery.removeEventListener('click', onGalleryItemClick);
+    // refs.gallery.removeEventListener('click', onGalleryItemClick);
   }
 }
+// function onGalleryItemClick(e) {
+//   e.preventDefault();
+//   if (e.target.closest('li')) {
+//     const elementId = e.target.closest('li');
+//     // refs.spinner.classList.remove('visually-hidden');
+//     createModal();
+//     addListenerOnClickClose();
+//     addListenerOnKeyClose();
+//     filmsApiService.movieId = elementId.id;
+//     getFilmInfo();
+//     refs.gallery.removeEventListener('click', onGalleryItemClick);
+//   }
+// }
 
-function createModal() {
-  if (document.querySelector('.js-modal')) {
-    return;
-  }
-  refs.gallery.insertAdjacentHTML(
-    'beforeend',
-    `<div class="js-modal modal">
-        <div class="js-modal__box modal__box">
-            
-        </div>
-      </div >`
-  );
-  refs.modal = document.querySelector('.js-modal');
-  refs.modalBox = document.querySelector('.js-modal__box');
-}
+// function createModal() {
+//   if (document.querySelector('.js-modal')) {
+//     return;
+//   }
+//   refs.gallery.insertAdjacentHTML(
+//     'beforeend',
+//     `<div class="js-modal modal">
+//         <div class="js-modal__box modal__box">
+
+//         </div>
+//       </div >`
+//   );
+//   refs.modal = document.querySelector('.js-modal');
+//   refs.modalBox = document.querySelector('.js-modal__box');
+// }
 
 //====================================================================
 function getFilmInfo() {
@@ -63,8 +80,7 @@ function makeMarkup(data) {
     popularity,
   } = data;
 
-  const markup = `<button class="modal__icon link button">
-            </button>
+  const markup = `
       <div class="film-detail">
     <img class="film-detail__poster" src="${
       IMAGE_URL + poster_path
@@ -113,31 +129,31 @@ function makeMarkup(data) {
     </ul>
 </div>`;
 
-  document.querySelector('.js-modal__box').innerHTML = markup;
+  modalBox.modalBox.innerHTML += markup;
 }
 
 //====================================================================
-function closeModal() {
-  refs.gallery.addEventListener('click', onGalleryItemClick);
-  refs.modal.remove();
-}
-function addListenerOnClickClose() {
-  refs.modal.addEventListener('click', e => {
-    if (e.target.classList.contains('js-modal')) {
-      closeModal();
-    } else if (e.target.classList.contains('modal__icon')) {
-      closeModal();
-    }
-  });
-}
+// function closeModal() {
+//   refs.gallery.addEventListener('click', onGalleryItemClick);
+//   refs.modal.remove();
+// }
+// function addListenerOnClickClose() {
+//   refs.modal.addEventListener('click', e => {
+//     if (e.target.classList.contains('js-modal')) {
+//       closeModal();
+//     } else if (e.target.classList.contains('modal__icon')) {
+//       closeModal();
+//     }
+//   });
+// }
 
-function addListenerOnKeyClose() {
-  document.addEventListener('keydown', onKeyClose);
-}
+// function addListenerOnKeyClose() {
+//   document.addEventListener('keydown', onKeyClose);
+// }
 
-function onKeyClose(e) {
-  if (e.code === 'Escape') {
-    closeModal();
-    document.removeEventListener('keydown', onKeyClose);
-  }
-}
+// function onKeyClose(e) {
+//   if (e.code === 'Escape') {
+//     closeModal();
+//     document.removeEventListener('keydown', onKeyClose);
+//   }
+// }

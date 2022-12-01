@@ -1,0 +1,40 @@
+.login__box {
+  display: block;
+  height: 50%;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: 'Roboto';
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  text-align: left;
+  line-height: 1.16;
+  padding-top: 15px;
+
+  & input {
+    padding: 4px;
+  }
+  & label {
+    font-size: 12px;
+  }
+
+  &__wrap {
+    margin-bottom: 20px;
+  }
+
+  &__submit {
+    position: absolute;
+    bottom: 20px;
+    width: calc(100% - 2 * 20px);
+    background-color: palevioletred;
+    color: rgb(73, 0, 73);
+    border: none;
+    border-radius: 5px;
+    padding: 12px;
+  }
+}
