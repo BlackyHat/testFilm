@@ -25,7 +25,6 @@ export class ModalBox {
   }
 
   addListenerOnClickClose = () => {
-    // this.modal.bind(this).addEventListener('click', e => {
     this.modal.addEventListener('click', e => {
       if (e.target.classList.contains('js-modal')) {
         this.closeModal();
@@ -47,7 +46,5 @@ export class ModalBox {
   };
   closeModal = () => {
     this.modal.remove();
-    // refs.gallery.addEventListener('click', onGalleryItemClick);
-
   };
 }

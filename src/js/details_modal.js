@@ -1,9 +1,12 @@
 import { FilmsApiService } from './search-api';
 import { ModalBox } from './pure_modal';
+import { FilmsLocalStorage } from './localStorage';
 
 const filmsApiService = new FilmsApiService();
 const modalBox = new ModalBox();
+const filmsLocalStorage = new FilmsLocalStorage();
 
+let currentCard = {};
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500/';
 const refs = {
   gallery: document.querySelector('.gallery'),
@@ -22,8 +25,44 @@ function onGalleryItemClick(e) {
     modalBox.addListenerOnKeyClose();
     filmsApiService.movieId = elementId.id;
     getFilmInfo();
+    refs.modalBox = document.querySelector('.js-modal__box');
+    //
+    // ACTIVE BUTTONS
+    refs.modalBox.addEventListener('click', e => {
+      const btn = e.target;
+      if (btn.nodeName !== 'BUTTON') {
+        return;
+      }
+      //================================LOCAL_STORAGE=============
+      // const action = btn.dataset.action;
+      // const db = filmsLocalStorage.load(action);
+      // //
+      // const isWatched = db ? db.find(film => film.id === currentCard.id) : 0;
+      // //
+      // console.log(isWatched);
+      // if (!isWatched) {
+      //   db.push(currentCard);
+      //   filmsLocalStorage.save(action, db);
+      // } else {
+      //   const indexFilm = db.indexOf(isWatched);
+      //   db.splice(isWatched, 1);
+      //   filmsLocalStorage.save(action, db);
+      // }
+      // console.log(JSON.stringify(db));
+    });
+    //   btn.dataset.action === 'watched'
+    //     ? addWatched(currentCard)
+    //     : addQueue(currentCard);
+    // });
     // refs.gallery.removeEventListener('click', onGalleryItemClick);
   }
+}
+
+function addWatched(info) {
+  localStorage.setItem('watched', JSON.stringify(info));
+}
+function addQueue(info) {
+  localStorage.setItem('queque', JSON.stringify(info));
 }
 // function onGalleryItemClick(e) {
 //   e.preventDefault();
@@ -78,7 +117,20 @@ function makeMarkup(data) {
     overview,
     genres,
     popularity,
+    id,
   } = data;
+
+  currentCard = {
+    original_title,
+    id,
+    poster_path,
+    title,
+    vote_average,
+    vote_count,
+    overview,
+    genres,
+    popularity,
+  };
 
   const markup = `
       <div class="film-detail">
@@ -122,9 +174,9 @@ function makeMarkup(data) {
     <h4 class="film-detail__about">ABOUT</h4>
     <p class="film-detail__overview">${overview}</p>
     <ul class="film-detail buttons">
-        <li><button type="button" class="film-detail__link">add to Watched</button>
+        <li><button type="button" class="film-detail__link" data-action="watched">add to Watched</button>
         </li>
-        <li><button  type="button" class="film-detail__link">add to queue</button>
+        <li><button  type="button" class="film-detail__link" data-action="queue">add to queue</button>
         </li>
     </ul>
 </div>`;

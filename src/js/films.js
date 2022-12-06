@@ -1,33 +1,63 @@
-// import { Notify } from 'notiflix';
 import { FilmsApiService } from './search-api';
+import Pagination from 'tui-pagination';
+// import 'tui-pagination/dist/tui-pagination.css';
+//===============================================
 
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500/';
 const filmsApiService = new FilmsApiService();
+// const container = document.getElementById('pagination');
+// const pagination = new Pagination(container);
 
+// pagination.on('afterMove', function (eventData) {
+//   alert('The current page is ' + eventData.page);
+// });
+const pagOpt = {
+  totalItems: 0,
+  visiblePages: 5,
+  page: 1,
+  centerAlign: true,
+  firstItemClassName: 'tui-first-child',
+  lastItemClassName: 'tui-last-child',
+  template: {
+    page: '<a href="#" class="tui-page-btn">{{page}}</a>',
+    currentPage:
+      '<strong class="tui-page-btn tui-is-selected">{{page}}</strong>',
+    moveButton:
+      '<a href="#" class="tui-page-btn tui-{{type}}">' +
+      '<span class="tui-ico-{{type}}">{{type}}</span>' +
+      '</a>',
+    disabledMoveButton:
+      '<span class="tui-page-btn tui-is-disabled tui-{{type}}">' +
+      '<span class="tui-ico-{{type}}">{{type}}</span>' +
+      '</span>',
+    moreButton:
+      '<a href="#" class="tui-page-btn tui-{{type}}-is-ellip">' +
+      '<span class="tui-ico-ellip">...</span>' +
+      '</a>',
+  },
+};
+//
 const refs = {
   form: document.querySelector('.search-form'),
   gallery: document.querySelector('.gallery'),
   spinner: document.querySelector('.loading'),
   pagination: document.querySelector('.pagination'),
+  header: document.querySelector('.hero-header'),
+  pagination: document.querySelector('#pagination'),
 };
+//
 let renderFilmCards = 0;
 let totalPages = 0;
 let isSearchEnd = false;
 let page = 1;
 let setPages = 0;
 let lastQuery = '';
-//====================================================================== messages
-// const END_MSG = () =>
-//   Notify.info(`We're sorry, but you've reached the end of search results.`);
-// const ERR_MSG = () =>
-//   Notify.failure(
-//     `Sorry, there are no images matching your search query. Please try again.`
-//   );
-// const SUCSESS_MSG = quantity =>
-//   Notify.success(`Hooray! We found ${quantity} images.`);
-//======================================================================
 
 refs.form.addEventListener('submit', onSubmitSearch);
+
+// refs.pagination.addEventListener('click', onPagination);
+// refs.header.addEventListener('click', onHeaderLink);
+
 //======================================================================
 getTrendingFilms(page);
 //======================================================================
@@ -41,13 +71,11 @@ function onSubmitSearch(e) {
   renderFilmCards = 0;
   filmsApiService.query = e.currentTarget.elements.searchQuery.value.trim();
   filmsApiService.resetResultPage();
-  markupPang(0);
   page = 1;
   getFilms(page);
 }
 
 function getFilms(page) {
-  lastQuery = 'search';
   filmsApiService
     .getDataApi(page)
     .then(({ results, total_results, total_pages }) => {
@@ -65,42 +93,39 @@ function getFilms(page) {
       }
       // searchResultMsg(filmsApiService.resultPage, total_results);
       createMarkup(results);
+      if (page < total_pages) {
+        pagOpt.totalItems = total_pages;
+        pagOpt.page = page;
+
+        const pagination = new Pagination('pagination', pagOpt);
+        pagination.on('afterMove', function (eventData) {
+          page = eventData.page;
+          getFilms(page);
+        });
+      }
       //======================================================================
       refs.spinner.classList.add('visually-hidden');
       //======================================================================
-
-      if (total_results > renderFilmCards) {
-        filmsApiService.incrementResultPage();
-      } else {
-        isSearchEnd = true;
-      }
-
-      if (renderFilmCards === total_results && total_results > PER_PAGE) {
-        // throw new Error(END_MSG());
-        throw new Error();
-      }
     })
     .catch(error => {
-      //   markupError();
       return error;
     });
 }
 
-function getTrendingFilms(pageS) {
-  lastQuery = 'trending';
+function getTrendingFilms(curPage) {
   //======================================================================
   refs.spinner.classList.remove('visually-hidden');
   //======================================================================
 
   filmsApiService
-    .getTrendingDataApi(pageS)
+    .getTrendingDataApi(curPage)
     .then(({ page, results, total_results, total_pages }) => {
       //
       totalPages = total_pages;
-      renderFilmCards += results.length;
+      // renderFilmCards += results.length;
       //
       if (!total_results) {
-        isSearchEnd = true;
+        // isSearchEnd = true;
         throw new Error();
 
         // throw new Error(ERR_MSG());
@@ -108,31 +133,29 @@ function getTrendingFilms(pageS) {
 
       // searchResultMsg(filmsApiService.resultPage, total_results);
       createMarkup(results);
-      //======================================================================
+      if (page < total_pages) {
+        pagOpt.totalItems = total_pages;
+        pagOpt.page = page;
+
+        const pagination = new Pagination('pagination', pagOpt);
+        pagination.on('afterMove', function (eventData) {
+          page = eventData.page;
+          getTrendingFilms(page);
+        });
+      }
+      // ======================================================================
       refs.spinner.classList.add('visually-hidden');
-      //======================================================================
+      // ======================================================================
 
       if (page === total_pages) {
         isSearchEnd = true;
-        // throw new Error(END_MSG());
+        throw new Error();
       }
-
-      // if (renderFilmCards === total_results && total_results > PER_PAGE) {
-      //   throw new Error();
-      //   // throw new Error(END_MSG());
-      // }
     })
     .catch(error => {
-      //   markupError();
       return error;
     });
 }
-
-// function searchResultMsg(currentPage, total) {
-//   if (currentPage === 1) {
-//     // SUCSESS_MSG(total);
-//   }
-// }
 
 function createMarkup(data) {
   const markup = data
@@ -152,7 +175,7 @@ function createMarkup(data) {
 
       return `<li class="gallery__item" id="${el.id}">
             <a class="film-card"">
-                    <img src="${IMAGE_URL + el.poster_path}" 
+                    <img src="${IMAGE_URL + el.poster_path}"" 
                         class="film-poster__img" loading="lazy" />
                   
 
@@ -241,83 +264,81 @@ video: false
 >>>   vote_average: 7.29
 >>>   vote_count: 2096
 */
+//======================================PAGINATION-1=========================
+// function onPagination(e) {
+//   if (e.target.classList.contains('pagination__link')) {
+//     page = e.target.dataset.value;
+//     //
+//     let action = e.target.dataset.action;
+//     // && totalPages >= setPages + 5 && !isSearchEnd
+//     if (action) {
+//       switch (action) {
+//         case 'increment':
+//           setPages += 1;
+//           break;
+//         case 'decrement':
+//           setPages > 0 ? (setPages -= 1) : setPages;
+//           break;
+//         case 'prev-five':
+//           setPages > 5 ? (setPages -= 5) : (setPages = 0);
+//           break;
+//         case 'next-five':
+//           setPages += 5;
+//           break;
+//         default:
+//           setPages;
+//           break;
+//       }
+//       markupPang(setPages);
+//     }
 
-refs.pagination.addEventListener('click', onPagination);
+//     if (!action) {
+//       let prevBtn = e.currentTarget.querySelector('.page-active');
+//       if (prevBtn) {
+//         prevBtn.classList.remove('page-active');
+//       }
+//       const nextBtn = e.target;
+//       nextBtn.classList.add('page-active');
+//       if (page > totalPages) {
+//         return;
+//       }
+//       switch (lastQuery) {
+//         case 'trending':
+//           getTrendingFilms(page);
+//           break;
+//         case 'search':
+//           getFilms(page);
+//           break;
+//       }
+//     }
+//   }
+// }
 
-function onPagination(e) {
-  if (e.target.classList.contains('pagination__link')) {
-    page = e.target.dataset.value;
-    //
-    let action = e.target.dataset.action;
-    // && totalPages >= setPages + 5 && !isSearchEnd
-    if (action) {
-      switch (action) {
-        case 'increment':
-          setPages += 1;
-          break;
-        case 'decrement':
-          setPages > 0 ? (setPages -= 1) : setPages;
-          break;
-        case 'prev-five':
-          setPages > 5 ? (setPages -= 5) : (setPages = 0);
-          break;
-        case 'next-five':
-          setPages += 5;
-          break;
-        default:
-          setPages;
-          break;
-      }
-      markupPang(setPages);
-    }
-
-    if (!action) {
-      let prevBtn = e.currentTarget.querySelector('.page-active');
-      if (prevBtn) {
-        prevBtn.classList.remove('page-active');
-      }
-      const nextBtn = e.target;
-      nextBtn.classList.add('page-active');
-      if (page > totalPages) {
-        return;
-      }
-      switch (lastQuery) {
-        case 'trending':
-          getTrendingFilms(page);
-          break;
-        case 'search':
-          getFilms(page);
-          break;
-      }
-    }
-  }
-}
-
-function markupPang(setPages) {
-  const markup = ` <li class="pagination__item "><a class="pagination__link link" data-action="decrement">
-                </a>
-            </li>
-            <li class="pagination__item"><a class="pagination__link link" data-action="prev-five">...</a>
-            </li>
-            <li class="pagination__item"><a class="pagination__link page-active link" data-value="${
-              setPages + 1
-            }">${setPages + 1}</a></li>
-            <li class="pagination__item"><a class="pagination__link page link" data-value="${
-              setPages + 2
-            }">${setPages + 2}</a></li>
-            <li class="pagination__item"><a class="pagination__link page link" data-value="${
-              setPages + 3
-            }">${setPages + 3}</a></li>
-            <li class="pagination__item"><a class="pagination__link page link" data-value="${
-              setPages + 4
-            }">${setPages + 4}</a></li>
-            <li class="pagination__item"><a class="pagination__link page link" data-value="${
-              setPages + 5
-            }">${setPages + 5}</a></li>
-            <li class="pagination__item"><a class="pagination__link page link" data-action="next-five">...</a>
-            </li>
-            <li class="pagination__item"><a class="pagination__link link" data-action="increment">
-                </a>
-            </li>`;
-  refs.pagination.innerHTML = markup;
-}
+// function markupPang(setPages) {
+//   const markup = ` <li class="pagination__item "><a class="pagination__link link" data-action="decrement">
+//                 </a>
+//             </li>
+//             <li class="pagination__item"><a class="pagination__link link" data-action="prev-five">...</a>
+//             </li>
+//             <li class="pagination__item"><a class="pagination__link page-active link" data-value="${
+//               setPages + 1
+//             }">${setPages + 1}</a></li>
+//             <li class="pagination__item"><a class="pagination__link page link" data-value="${
+//               setPages + 2
+//             }">${setPages + 2}</a></li>
+//             <li class="pagination__item"><a class="pagination__link page link" data-value="${
+//               setPages + 3
+//             }">${setPages + 3}</a></li>
+//             <li class="pagination__item"><a class="pagination__link page link" data-value="${
+//               setPages + 4
+//             }">${setPages + 4}</a></li>
+//             <li class="pagination__item"><a class="pagination__link page link" data-value="${
+//               setPages + 5
+//             }">${setPages + 5}</a></li>
+//             <li class="pagination__item"><a class="pagination__link page link" data-action="next-five">...</a>
+//             </li>
+//             <li class="pagination__item"><a class="pagination__link link" data-action="increment">
+//                 </a>
+//             </li>`;
+//   refs.pagination.innerHTML = markup;
+// }

@@ -29,7 +29,7 @@ const app = initializeApp(firebaseConfig);
 // // const db =.database();
 // Initialize Realtime Database and get a reference to the service
 const database = getDatabase(app);
-console.log(database);
+// console.log(database);
 
 function writeUserData(userId, name, email, watchedIds, queryIds) {
   const db = getDatabase();

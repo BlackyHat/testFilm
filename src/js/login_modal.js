@@ -1,4 +1,4 @@
-import { Notify } from 'notiflix';
+// import { Notify } from 'notiflix';
 import { ModalBox } from './pure_modal';
 // FIREBASE
 import { FireBaseApi } from './firebase';
